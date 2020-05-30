@@ -1,23 +1,20 @@
 const { MongoClient } = require('mongodb');
 
 const mongoUrl = process.env.DB_URL || 'mongodb://localhost:27017';
+const client = new MongoClient(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
 
-// function connectToDb(databaseName, collectionName) {
-//   return new Promise((resolve, reject) => {
-//     console.log('Mongo url', mongoUrl);
-//     const client = new MongoClient(mongoUrl, { useNewUrlParser: true });
-//     client.connect((err) => {
-//       if (err) {
-//         reject(err);
-//       } else {
-//         console.log('Mongo Connection established!');
-//         resolve(client);
-//       }
-//     });
-//   });
-// }
-const db = new MongoClient(mongoUrl, { useNewUrlParser: true }).db('demo');
+function connectToDb(databaseName) { // STUDENT
+  return new Promise((resolve, reject) => {
+    console.log('Mongo url', mongoUrl);
+    client.connect((err) => {
+      if (err) {
+        reject(err);
+      } else {
+        console.log('Mongo Connection established!');
+        resolve(client.db(databaseName));
+      }
+    });
+  });
+}
 
-
-
-exports.initializeMongoConnection = db;
+module.exports = { dbClient: client, dbConnect: connectToDb('seedDemo') };

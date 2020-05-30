@@ -1,26 +1,29 @@
 const readline = require('readline');
+const fs = require('fs');
 const path = require('path');
 
 const csvLineToObj = require('../transformers/fromCSV');
 const { BATCH_SIZE, TOTAL_RECORDS, LOG_RATE, DATA_DIR, NUMBER_OF_FILES } = require('../config.js');
 
 function databaseWriter(fileName, fileNumber, batchInserter, logger) {
-  const filePath = path.join(DATA_DIR, fileName);
-  const reader = readline.createInterface({ input: filePath });
+  const filePath = path.join(DATA_DIR, `${fileName}-${fileNumber}.csv`);
+  const readerStream = fs.createReadStream(filePath, 'utf8');
+  const reader = readline.createInterface({ input: readerStream });
   const recordsPerFile = TOTAL_RECORDS / NUMBER_OF_FILES;
 
   let inserted = (fileNumber - 1) * recordsPerFile;
   let buffer = [];
 
+  let previousInsertionPromise;
+
   return new Promise((resolve, reject) => {
     reader.on('line', (csvLine) => {
-      read += 1;
       buffer.push(csvLineToObj(csvLine));
 
       if (buffer.length >= BATCH_SIZE) {
         const batch = buffer;
         buffer = [];
-        batchInserter(batch).then(() => {
+        previousInsertionPromise = batchInserter(batch).then(() => {
           inserted += batch.length;
 
           if (inserted % LOG_RATE === 0) {
@@ -32,9 +35,14 @@ function databaseWriter(fileName, fileNumber, batchInserter, logger) {
 
     reader.on('close', () => {
       if (fileNumber < NUMBER_OF_FILES) {
-        resolve(databaseWriter(fileName, fileNumber + 1, batchInserter, logger));
+        previousInsertionPromise
+          .then(() => {
+            console.log('********************* SWITCHING FILES *******************\n')
+            resolve(databaseWriter(fileName, fileNumber + 1, batchInserter, logger));
+          });
       } else {
-        resolve();
+        previousInsertionPromise
+          .then(() => resolve());
       }
     });
 
