@@ -3,13 +3,13 @@ const path = require('path');
 const { BATCH_SIZE, TOTAL_RECORDS, LOG_RATE, NUMBER_OF_FILES} = require('../config.js');
 const toCSV = require('../transformers/toCSV');
 
-function dataWriter(fileName, destinationDir, generator, logger) {
+function dataWriter(fileName, fileNumber, destinationDir, generator, logger) {
   const recordsPerFile = TOTAL_RECORDS / NUMBER_OF_FILES;
-  let currentFileNum = 1;
-  let writer = fs.createWriteStream(path.join(destinationDir, `${fileName}-${currentFileNum}.csv`));
-  let currentId = 0;
+  let writer = fs.createWriteStream(path.join(destinationDir, `${fileName}-${fileNumber}.csv`));
+  let currentId = (fileNumber - 1) * recordsPerFile;
   let batch = [];
   let lastLogId = 0;
+  let isEndOfFile = false;
 
   return new Promise((resolve, reject) => {
     writer.on('error', (err) => reject(err))
@@ -21,13 +21,21 @@ function dataWriter(fileName, destinationDir, generator, logger) {
         batch = toCSV(generator(currentId));
         // process.exit();
         currentId += BATCH_SIZE;
+        if (currentId % recordsPerFile === 0) isEndOfFile = true;
 
         if (currentId === TOTAL_RECORDS) {
           // last batch!
           writer.write(batch, 'utf8', () => {
             logger.log(currentId);
-            resolve();
+            resolve(fileNumber);
           });
+        } else if (isEndOfFile) {
+          ok = false;
+          writer.write(batch, 'utf8', () => {
+            logger.log(currentId);
+            writer.close();
+            resolve(dataWriter(fileName, fileNumber + 1, destinationDir, generator, logger))
+          })
         } else if (currentId - lastLogId > LOG_RATE) {
           const logId = currentId
           ok = writer.write(batch, 'utf8', () => {
@@ -38,13 +46,9 @@ function dataWriter(fileName, destinationDir, generator, logger) {
           ok = writer.write(batch, 'utf8');
         }
 
-          //   currentFileNum += 1;
-          //   writer = fs.createWriteStream(path.join(destinationDir, `${fileName}-${currentFileNum}.csv`));
-          // }
-        // if
       } while (currentId < TOTAL_RECORDS && ok);
 
-      if (currentId < TOTAL_RECORDS) {
+      if (currentId < TOTAL_RECORDS && !isEndOfFile) {
         // Had to stop early!
         // Write some more once it drains.
         writer.once('drain', write);

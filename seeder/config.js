@@ -5,7 +5,7 @@ const settings = {
   BATCH_SIZE: 1000,
   FILE_NAME: 'demoData',
   DESTINATION_DIR: path.join(__dirname, 'data'),
-  NUMBER_OF_FILES: 2,
+  NUMBER_OF_FILES: 5,
   LOG_RATE: 1e6,
 };
 
