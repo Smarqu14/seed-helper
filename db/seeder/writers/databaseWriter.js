@@ -37,7 +37,7 @@ function databaseWriter(fileName, fileNumber, batchInserter, logger) {
       if (fileNumber < NUMBER_OF_FILES) {
         previousInsertionPromise
           .then(() => {
-            console.log('********************* SWITCHING FILES *******************\n')
+            logger.nextFile(fileNumber);
             resolve(databaseWriter(fileName, fileNumber + 1, batchInserter, logger));
           });
       } else {

@@ -1,21 +1,28 @@
-const { dbConnect, dbClient } = require('../mongo/connect');
-const generateRecords = require('./recordGenerators/generateRecords');
-const fileWriter = require('./writers/fileWriter');
-const databaseWriter = require('./writers/databaseWriter');
-const bulkInsert = require('../mongo/bulkInsert');
-const Logger = require('./logger');
-const { FILE_NAME, DATA_DIR} = require('./config');
+// const makeSeedFiles = require('./makeSeedFiles');
+// const insertSeedFiles = require('./insertSeedFiles');
 
-const logger = new Logger('demo record');
-const startFileNum = 1;
+const cliArg = process.argv[2]; // first commandline argument
 
-// fileWriter(FILE_NAME, startFileNum, generateRecords, logger)
-//   .then(() => console.log('DONE!!!'))
-//   .catch((err) => console.log(err))
+if (cliArg === 'full') {
+  const makeSeedFiles = require('./makeSeedFiles');
+  const insertSeedFiles = require('./insertSeedFiles');
 
-// function databaseWriter(fileName, fileNumber, batchInserter, logger) {
-dbConnect
-  .then(() => databaseWriter(FILE_NAME, startFileNum, bulkInsert, new Logger('demo')))
-  .then(() => console.log('DONE!!!'))
-  .then(() => dbClient.close())
-  .catch((err) => console.log(err))
+  makeSeedFiles()
+    .then(() => console.log('\n\n########## MOVING TO INSERTION ##########\n\n'))
+    .then(insertSeedFiles)
+    .catch((err) => console.log(err));
+} else if (cliArg === 'files') {
+  const makeSeedFiles = require('./makeSeedFiles');
+
+  makeSeedFiles()
+    .then(() => console.log('\nSeed Files Created!'))
+    .catch((err) => console.log(err));
+} else if (cliArg === 'database') {
+  const insertSeedFiles = require('./insertSeedFiles');
+
+  insertSeedFiles()
+    .then(() => console.log('\nSeed Files Inserted into Database!'))
+    .catch((err) => console.log(err));
+} else {
+  throw new Error('Please include command line argument: "both" or "files" or "database"')
+}

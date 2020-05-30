@@ -1,6 +1,0 @@
-- generate record
-  - CreateInfiniteArrayIncrementer
-- write to CSV
-- write to JSON
-- read stream from CSV
-- Logging

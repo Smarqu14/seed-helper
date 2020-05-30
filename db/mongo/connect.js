@@ -10,7 +10,7 @@ function connectToDb(databaseName) { // STUDENT
       if (err) {
         reject(err);
       } else {
-        console.log('Mongo Connection established!');
+        console.log('Mongo Connection established!\n');
         resolve(client.db(databaseName));
       }
     });

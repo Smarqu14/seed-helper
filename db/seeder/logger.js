@@ -1,10 +1,10 @@
 const { TOTAL_RECORDS, LOG_RATE } = require('./config');
 
 class Logger {
-  constructor(type) {
+  constructor(action, recordType) {
     this.startTime = process.hrtime();
     this.lastLogTime = process.hrtime();
-    this.type = type;
+    this.header = `- ${action}: ${recordType} -`;
   }
 
   log(currentId) {
@@ -17,10 +17,15 @@ class Logger {
 
     // const logsRemaining = recordsRemaining / LOG_RATE;
     const estimatedMinutesRemaining = (secondsSinceLastLog * logsRemaining) / 60;
-    console.log(`${this.type} RECORDS INSERTED: ${currentId}/${TOTAL_RECORDS}`);
-    console.log(`TIME SINCE LAST LOG (sec): ${secondsSinceLastLog}`);
-    console.log(`ESTIMATED TIME REMAINING (mins): ${estimatedMinutesRemaining}`);
+    console.log(this.header);
+    console.log(`COUNT: ${currentId}/${TOTAL_RECORDS}`);
+    console.log(`TIME SINCE LAST LOG (sec): ${secondsSinceLastLog || '< 1'}`);
+    console.log(`ESTIMATED TIME REMAINING (mins): ${estimatedMinutesRemaining || '< 1'}`);
     console.log(`TOTAL TIME (mins): ${totalSeconds / 60}\n`);
+  }
+
+  nextFile(currentFileNum) {
+    console.log(`*********** SWITCHING TO FILE #${currentFileNum + 1} ***********\n`)
   }
 }
 

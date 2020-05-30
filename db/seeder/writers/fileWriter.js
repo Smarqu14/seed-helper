@@ -33,6 +33,7 @@ function dataWriter(fileName, fileNumber, generator, logger) {
           writer.write(batch, 'utf8', () => {
             logger.log(currentId);
             writer.close();
+            logger.nextFile(fileNumber);
             resolve(dataWriter(fileName, fileNumber + 1, generator, logger))
           })
         } else if (currentId - lastLogId > LOG_RATE) {
