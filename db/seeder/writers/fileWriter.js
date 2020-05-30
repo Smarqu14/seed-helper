@@ -1,11 +1,11 @@
 const fs = require('fs');
 const path = require('path');
-const { BATCH_SIZE, TOTAL_RECORDS, LOG_RATE, NUMBER_OF_FILES} = require('../config.js');
+const { BATCH_SIZE, TOTAL_RECORDS, LOG_RATE, NUMBER_OF_FILES, DATA_DIR } = require('../config.js');
 const toCSV = require('../transformers/toCSV');
 
-function dataWriter(fileName, fileNumber, destinationDir, generator, logger) {
+function dataWriter(fileName, fileNumber, generator, logger) {
   const recordsPerFile = TOTAL_RECORDS / NUMBER_OF_FILES;
-  let writer = fs.createWriteStream(path.join(destinationDir, `${fileName}-${fileNumber}.csv`));
+  let writer = fs.createWriteStream(path.join(DATA_DIR, `${fileName}-${fileNumber}.csv`));
   let currentId = (fileNumber - 1) * recordsPerFile;
   let batch = [];
   let lastLogId = 0;
@@ -19,7 +19,6 @@ function dataWriter(fileName, fileNumber, destinationDir, generator, logger) {
 
       do {
         batch = toCSV(generator(currentId));
-        // process.exit();
         currentId += BATCH_SIZE;
         if (currentId % recordsPerFile === 0) isEndOfFile = true;
 
@@ -34,7 +33,7 @@ function dataWriter(fileName, fileNumber, destinationDir, generator, logger) {
           writer.write(batch, 'utf8', () => {
             logger.log(currentId);
             writer.close();
-            resolve(dataWriter(fileName, fileNumber + 1, destinationDir, generator, logger))
+            resolve(dataWriter(fileName, fileNumber + 1, generator, logger))
           })
         } else if (currentId - lastLogId > LOG_RATE) {
           const logId = currentId

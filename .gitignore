@@ -1,1 +1,3 @@
 *.csv
+*package*
+node_modules
