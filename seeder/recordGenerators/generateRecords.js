@@ -10,7 +10,9 @@ function generateSingleRecord(id) {
 
 function generateBatchOfRecords(startId) {
   const batch = [];
-  for (let i = startId; i - startId < BATCH_SIZE; i += 1) {
+  startId += 1;
+
+  for (let i = startId; i - startId <= BATCH_SIZE; i += 1) {
     batch.push(generateSingleRecord(i));
   }
   return batch;

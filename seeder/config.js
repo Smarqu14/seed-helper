@@ -9,5 +9,12 @@ const settings = {
   LOG_RATE: 1e6,
 };
 
+if (settings.TOTAL_RECORDS % settings.NUMBER_OF_FILES !== 0) {
+  throw new Error('config.js: TOTAL_RECORDS must be perfectly divisible by NUMBER_OF_FILES');
+}
+
+if (settings.TOTAL_RECORDS % settings.BATCH_SIZE !== 0) {
+  throw new Error('config.js: TOTAL_RECORDS must be perfectly divisible by BATCH_SIZE');
+}
 
 module.exports = settings;
