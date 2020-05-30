@@ -3,9 +3,9 @@ const path = require('path');
 const settings = {
   TOTAL_RECORDS: 1e7, // this is 10 million
   BATCH_SIZE: 1000,
-  FILE_NAME: 'data.csv',
+  FILE_NAME: 'demoData',
   DESTINATION_DIR: path.join(__dirname, 'data'),
-  NUMBER_OF_FILES: 4,
+  NUMBER_OF_FILES: 2,
   LOG_RATE: 1e6,
 };
 
