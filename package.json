@@ -1,0 +1,19 @@
+{
+  "name": "seedinghelper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed:delete": "rm ./db/seeder/data/*.csv",
+    "check": "bash checkSeedFiles.bash",
+    "seed:files": "node ./db/seeder/main.js 'files'",
+    "seed:database": "node ./db/seeder/main.js 'database'",
+    "seed:full": "node ./db/seeder/main.js 'full'"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^3.5.8"
+  }
+}
